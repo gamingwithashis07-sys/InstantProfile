@@ -1,0 +1,17 @@
+import { NextResponse } from 'next/server'
+import { getSession, unauthorized } from '@/lib/auth'
+
+export async function GET() {
+  const session = await getSession()
+  if (!session) return unauthorized()
+  const times = [
+    { day: 'Monday', best: '11:00 AM', score: 92 },
+    { day: 'Tuesday', best: '10:00 AM', score: 88 },
+    { day: 'Wednesday', best: '12:00 PM', score: 85 },
+    { day: 'Thursday', best: '1:00 PM', score: 90 },
+    { day: 'Friday', best: '9:00 AM', score: 87 },
+    { day: 'Saturday', best: '10:00 AM', score: 78 },
+    { day: 'Sunday', best: '11:00 AM', score: 82 },
+  ]
+  return NextResponse.json({ bestTimes: times, recommendation: 'Best overall time: Wednesday 12:00 PM' })
+}

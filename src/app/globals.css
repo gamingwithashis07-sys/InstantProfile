@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind utilities;
+@tailwind components;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --accent-color: #f4a261;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f5e6d3;
+  color: #2d1f14;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body,
+body.dark {
+  background: #1a0e08;
+  color: #e8d5c4;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(232, 168, 124, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(212, 163, 115, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(244, 162, 97, 0.1) 0%, transparent 50%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.dark body::before {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(232, 168, 124, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(212, 163, 115, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(244, 162, 97, 0.05) 0%, transparent 50%);
+}
+
+/* Animated gradient hero background */
+.hero-gradient {
+  background: linear-gradient(135deg, #e8a87c, #f4a261, #d4a373, #e8a87c);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Glassmorphism base */
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Claymorphism base */
+.clay {
+  background: #e8d5c4;
+  border-radius: 24px;
+  box-shadow: 8px 8px 16px #c4b5a5, -8px -8px 16px #fff5eb;
+}
+
+.dark .clay {
+  background: #2d1f14;
+  box-shadow: 4px 4px 12px rgba(0,0,0,0.5), -4px -4px 12px rgba(60,40,30,0.3);
+}
+
+/* Neumorphism inset for inputs */
+.neu-inset {
+  background: #e8d5c4;
+  box-shadow: inset 3px 3px 6px #c4b5a5, inset -3px -3px 6px #fff5eb;
+  border-radius: 14px;
+}
+
+.dark .neu-inset {
+  background: #2d1f14;
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.5), inset -2px -2px 5px rgba(60,40,30,0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4b5a5;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4a3a2c;
+}
+
+/* Table styles */
+.neu-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.neu-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b5a4c;
+  border-bottom: 2px solid #c4b5a5;
+}
+
+.dark .neu-table th {
+  color: #9c8a7a;
+  border-bottom-color: #3a2a1c;
+}
+
+.neu-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  color: #2d1f14;
+}
+
+.dark .neu-table td {
+  border-bottom-color: rgba(255,255,255,0.05);
+  color: #e8d5c4;
+}
+
+.neu-table tr:hover td {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
