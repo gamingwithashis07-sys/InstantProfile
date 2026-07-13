@@ -14,7 +14,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
             <Link href="/">
-              <img src="/logo.png" alt="InstantProfile" className="h-12 w-auto" />
+              <img src="/logo.png" alt="InstantProfile" className="h-16 w-auto" />
             </Link>
             <p className="mt-3 text-sm text-[#6b5a4c] dark:text-[#9c8a7a] max-w-sm leading-relaxed">
               The most reliable Instagram automation platform. Automate DMs,
