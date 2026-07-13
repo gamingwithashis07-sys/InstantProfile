@@ -4,15 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate --schema=../../prisma/schema.prisma && next build",
+    "build": "npx prisma generate --schema=prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx prisma generate --schema=../../prisma/schema.prisma"
+    "postinstall": "npx prisma generate --schema=prisma/schema.prisma"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.17",
     "@clerk/themes": "^2.4.57",
-    "@instantprofile/shared": "*",
     "@prisma/client": "^6.19.3",
     "canvas-confetti": "^1.9.2",
     "clsx": "^2.1.0",

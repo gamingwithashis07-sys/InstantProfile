@@ -1,7 +1,7 @@
 {
   "name": "instantprofile",
   "private": true,
-  "workspaces": ["packages/shared", "apps/admin"],
+  "workspaces": ["apps/admin"],
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && next build",
@@ -14,7 +14,6 @@
   "dependencies": {
     "@clerk/nextjs": "^7.5.17",
     "@clerk/themes": "^2.4.57",
-    "@instantprofile/shared": "*",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^2.4.3",
     "canvas-confetti": "^1.9.2",

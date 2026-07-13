@@ -2,7 +2,6 @@
 const nextConfig = {
   output: 'standalone',
   serverExternalPackages: ['@prisma/client'],
-  transpilePackages: ['@instantprofile/shared'],
   async headers() {
     return [
       {

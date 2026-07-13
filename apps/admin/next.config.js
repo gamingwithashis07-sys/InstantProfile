@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  transpilePackages: ['@instantprofile/shared'],
-}
+const nextConfig = {}
 
 module.exports = nextConfig
