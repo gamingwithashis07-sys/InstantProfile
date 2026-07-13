@@ -22,7 +22,7 @@ export function BottomNav() {
       animate={{ y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       className="fixed bottom-0 left-0 right-0 z-[1000] md:hidden
-        bg-white/80 dark:bg-black/80 backdrop-blur-[12px]
+        bg-white/95 dark:bg-black/95
         border-t border-white/20 dark:border-white/5
         flex items-center justify-around px-2 pt-2 pb-1
         shadow-[0_-4px_20px_rgba(0,0,0,0.1)]

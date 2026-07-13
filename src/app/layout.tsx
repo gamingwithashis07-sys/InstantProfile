@@ -24,7 +24,7 @@ export default function RootLayout({
           <ThemeProvider>
             <ToastProvider>
               <Navbar />
-              <main className="pt-[70px] pb-[70px] md:pb-0">{children}</main>
+              <main className="pt-[70px] pb-[75px] md:pb-0">{children}</main>
               <BottomNav />
               <Footer />
             </ToastProvider>

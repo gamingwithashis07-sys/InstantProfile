@@ -13,7 +13,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="relative mt-20 border-t border-white/10 bg-white/5 dark:bg-black/10 backdrop-blur-[8px]">
+    <footer className="hidden md:block relative mt-20 border-t border-white/10 bg-white/5 dark:bg-black/10">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
