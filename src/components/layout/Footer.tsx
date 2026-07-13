@@ -3,11 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Instagram, Twitter, Github, Mail, Heart, ArrowUp } from 'lucide-react'
-import { useThemeContext } from './ThemeProvider'
-
 export function Footer() {
-  const { accent } = useThemeContext()
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -17,9 +13,8 @@ export function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
-            <Link href="/" className="flex items-center gap-2">
-              <img src="/logo.png" alt="InstantProfile" className="h-7 w-auto" />
-              <span className="text-xl font-extrabold tracking-tight" style={{ color: accent }}>InstantProfile</span>
+            <Link href="/">
+              <img src="/logo.png" alt="InstantProfile" className="h-12 w-auto" />
             </Link>
             <p className="mt-3 text-sm text-[#6b5a4c] dark:text-[#9c8a7a] max-w-sm leading-relaxed">
               The most reliable Instagram automation platform. Automate DMs,

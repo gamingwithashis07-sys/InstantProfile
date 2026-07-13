@@ -42,9 +42,8 @@ export function Navbar() {
           bg-white/95 dark:bg-[#1a0e08]/95 border-b border-white/25 dark:border-white/10
           shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
       >
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="InstantProfile" className="h-8 w-auto" />
-          <span className="text-xl font-extrabold tracking-tight" style={{ color: accent }}>InstantProfile</span>
+        <Link href="/">
+          <img src="/logo.png" alt="InstantProfile" className="h-10 w-auto" />
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
