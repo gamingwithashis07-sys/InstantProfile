@@ -39,7 +39,7 @@ export function Navbar() {
     <>
       <nav
         className="fixed top-0 left-0 right-0 z-[1000] h-[70px] px-4 md:px-8 flex items-center justify-between
-          bg-white/15 dark:bg-black/20 backdrop-blur-[12px] border-b border-white/25 dark:border-white/10
+          bg-white/95 dark:bg-[#1a0e08]/95 border-b border-white/25 dark:border-white/10
           shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
       >
         <Link href="/" className="text-2xl font-extrabold tracking-tight" style={{ color: accent }}>
@@ -82,7 +82,7 @@ export function Navbar() {
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-full mt-2 p-3 bg-white/80 dark:bg-[#2d1f14]/90 backdrop-blur-[12px] rounded-[16px] border border-white/30 shadow-lg flex gap-2"
+                  className="absolute right-0 top-full mt-2 p-3 bg-white dark:bg-[#2d1f14] rounded-[16px] border border-white/30 shadow-lg flex gap-2"
                 >
                   {accentColors.map((c) => (
                     <button
@@ -110,7 +110,7 @@ export function Navbar() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 top-full mt-2 w-44 p-2 bg-white/80 dark:bg-[#2d1f14]/90 backdrop-blur-[12px] rounded-[16px] border border-white/30 shadow-lg"
+                  className="absolute right-0 top-full mt-2 w-44 p-2 bg-white dark:bg-[#2d1f14] rounded-[16px] border border-white/30 shadow-lg"
                 >
                   {!checked ? (
                     <div className="px-3 py-2 text-sm text-[#6b5a4c] dark:text-[#9c8a7a]">Loading...</div>
@@ -175,7 +175,7 @@ export function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-[70px] left-0 right-0 z-[999] p-4 bg-white/90 dark:bg-[#1a0e08]/95 backdrop-blur-[12px] border-b border-white/30 md:hidden"
+            className="fixed top-[70px] left-0 right-0 z-[999] p-4 bg-white dark:bg-[#1a0e08] border-b border-white/30 md:hidden"
           >
             <div className="flex flex-col gap-3">
               <Link href="/" onClick={() => setMobileOpen(false)} className="px-4 py-2 text-sm font-medium text-[#6b5a4c] dark:text-[#9c8a7a] rounded-[10px] hover:bg-white/20">Home</Link>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Edit3, Trash2, BookOpen, FileText, Sparkles, Download, Shield, FileCheck } from 'lucide-react'
+import { Plus, Edit3, Trash2, BookOpen, FileText, Sparkles, Download, Shield, FileCheck, Share2, Upload } from 'lucide-react'
 import { ClayCard } from '@/components/ui/ClayCard'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { NeuButton } from '@/components/ui/NeuButton'
@@ -31,6 +31,7 @@ export default function ManageProducts() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<any>(null)
   const [form, setForm] = useState({ title: '', description: '', price: '0', type: 'digital', slug: '', image_url: '', file_url: '' })
+  const [uploading, setUploading] = useState<'image' | 'file' | null>(null)
   const [saving, setSaving] = useState(false)
   const [policies, setPolicies] = useState<Record<string, string>>({})
   const [showPolicies, setShowPolicies] = useState(false)
@@ -65,6 +66,28 @@ export default function ManageProducts() {
     setPolicies(parsed)
     setShowPolicies(false)
     setShowModal(true)
+  }
+
+  const handleUpload = async (field: 'image_url' | 'file_url', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(field === 'image_url' ? 'image' : 'file')
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploading(null)
+    if (data.url) {
+      setForm(prev => ({ ...prev, [field]: data.url }))
+      showToast(`${field === 'image_url' ? 'Image' : 'File'} uploaded!`, 'success')
+    } else {
+      showToast('Upload failed', 'error')
+    }
+  }
+
+  const copyProductLink = (slug: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/shop/${slug}`)
+    showToast('Link copied!', 'success')
   }
 
   const handleSave = async () => {
@@ -174,6 +197,9 @@ export default function ManageProducts() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <button onClick={() => copyProductLink(p.slug)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" title="Copy share link">
+                        <Share2 className="w-4 h-4 text-[#f4a261]" />
+                      </button>
                       <span title={`${policyCount} policies`} className={`text-xs px-1.5 py-0.5 rounded-full ${policyCount >= 3 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
                         <Shield className="w-3 h-3 inline mr-0.5" />{policyCount}
                       </span>
@@ -231,8 +257,26 @@ export default function ManageProducts() {
                 </div>
               </div>
               <NeuInput label="Price ($)" type="number" step="0.01" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
-              <NeuInput label="Image URL" value={form.image_url} onChange={e => setForm({ ...form, image_url: e.target.value })} />
-              <NeuInput label="File URL" value={form.file_url} onChange={e => setForm({ ...form, file_url: e.target.value })} />
+              <div>
+                <label className="block text-xs font-medium text-[#6b5a4c] dark:text-[#9c8a7a] mb-1">Image</label>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer px-4 py-2 rounded-[12px] bg-[#ece7e1] dark:bg-[#2a2522] text-sm hover:bg-[#f4a261]/20 transition-colors flex items-center gap-2">
+                    <Upload className="w-4 h-4" /> {uploading === 'image' ? 'Uploading...' : 'Upload Image'}
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleUpload('image_url', e)} />
+                  </label>
+                  {form.image_url && <span className="text-xs text-emerald-500 truncate max-w-[200px]">Uploaded ✓</span>}
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#6b5a4c] dark:text-[#9c8a7a] mb-1">File (PDF, ZIP, etc.)</label>
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer px-4 py-2 rounded-[12px] bg-[#ece7e1] dark:bg-[#2a2522] text-sm hover:bg-[#f4a261]/20 transition-colors flex items-center gap-2">
+                    <Upload className="w-4 h-4" /> {uploading === 'file' ? 'Uploading...' : 'Upload File'}
+                    <input type="file" className="hidden" onChange={e => handleUpload('file_url', e)} />
+                  </label>
+                  {form.file_url && <span className="text-xs text-emerald-500 truncate max-w-[200px]">Uploaded ✓</span>}
+                </div>
+              </div>
               <label className="block text-xs font-medium text-[#6b5a4c] dark:text-[#9c8a7a]">Description</label>
               <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full p-3 rounded-[14px] bg-[#ece7e1] dark:bg-[#2a2522] border-2 border-transparent focus:border-[#f4a261] outline-none text-sm min-h-[80px]" />
             </div>

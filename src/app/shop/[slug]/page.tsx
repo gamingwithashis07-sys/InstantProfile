@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Download, ShoppingCart, CheckCircle, BookOpen, FileText, Sparkles, Shield, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Download, ShoppingCart, CheckCircle, BookOpen, FileText, Sparkles, Shield, ChevronDown, Share2 } from 'lucide-react'
 import { GlassCard } from '@/components/ui/GlassCard'
 import { NeuButton } from '@/components/ui/NeuButton'
 import { useToast } from '@/components/ui/Toast'
+
 
 const typeIcons: Record<string, any> = {
   course: BookOpen,
@@ -171,11 +172,23 @@ export default function ProductDetail() {
   return (
     <div className="min-h-screen p-4 md:p-8 max-w-4xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <Link href="/shop">
-          <NeuButton variant="ghost" size="sm" className="mb-6">
-            <ArrowLeft className="w-4 h-4" /> Back
-          </NeuButton>
-        </Link>
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/shop">
+            <NeuButton variant="ghost" size="sm">
+              <ArrowLeft className="w-4 h-4" /> Back
+            </NeuButton>
+          </Link>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href)
+              showToast('Link copied!', 'success')
+            }}
+            className="p-2 rounded-[10px] bg-[#e8d5c4]/50 dark:bg-[#2d1f14]/50 text-[#6b5a4c] dark:text-[#9c8a7a] hover:text-[#f4a261] transition-colors"
+            title="Share this product"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        </div>
 
         <div className="grid md:grid-cols-5 gap-8">
           <div className="md:col-span-3">

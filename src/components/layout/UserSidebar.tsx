@@ -43,7 +43,7 @@ export function UserSidebar() {
       animate={{ width: collapsed ? 72 : 240 }}
       className={cn(
         'fixed left-0 top-[70px] bottom-0 z-[500]',
-        'bg-white/10 dark:bg-black/20 backdrop-blur-[12px]',
+        'bg-white/95 dark:bg-[#1a0e08]/95',
         'border-r border-white/20 dark:border-white/5',
         'p-3 flex flex-col gap-1 overflow-hidden'
       )}
