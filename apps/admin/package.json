@@ -1,22 +1,19 @@
 {
-  "name": "instantprofile",
+  "name": "@instantprofile/admin",
+  "version": "1.0.0",
   "private": true,
-  "workspaces": ["packages/shared", "apps/admin"],
   "scripts": {
     "dev": "next dev",
-    "build": "npx prisma generate && next build",
+    "build": "npx prisma generate --schema=../../prisma/schema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "npx prisma generate",
-    "dev:admin": "npm run dev -w apps/admin",
-    "build:admin": "npm run build -w apps/admin"
+    "postinstall": "npx prisma generate --schema=../../prisma/schema.prisma"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.17",
     "@clerk/themes": "^2.4.57",
     "@instantprofile/shared": "*",
     "@prisma/client": "^6.19.3",
-    "bcryptjs": "^2.4.3",
     "canvas-confetti": "^1.9.2",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.0",
@@ -25,11 +22,9 @@
     "prisma": "^6.19.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recharts": "^2.12.0",
-    "sql.js": "^1.10.2"
+    "recharts": "^2.12.0"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
     "@types/canvas-confetti": "^1.6.4",
     "@types/node": "^20.0.0",
     "@types/react": "^19.0.0",

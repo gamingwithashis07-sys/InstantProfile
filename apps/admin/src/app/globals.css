@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --clay-bg: #f5f0eb;
+  --clay-text: #2d1f14;
+}
+
+.dark {
+  --clay-bg: #1a0e08;
+  --clay-text: #e8d5c4;
+}
+
+body {
+  background: var(--clay-bg);
+  color: var(--clay-text);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.clay {
+  background: linear-gradient(145deg, #f5f0eb, #e8e0d5);
+  box-shadow: 8px 8px 16px #c4b5a5, -8px -8px 16px #fff5eb;
+}
+
+.dark .clay {
+  background: linear-gradient(145deg, #1a0e08, #241610);
+  box-shadow: 8px 8px 16px #0a0805, -8px -8px 16px #2e1f15;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #f4a261 0%, #e07c3c 25%, #c46cb8 50%, #6cb8c4 75%, #7cb86c 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient 8s ease infinite;
+}
+
+@layer base {
+  * { @apply border-white/10; }
+}
+
+.neu-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.neu-table th {
+  @apply text-left text-xs font-semibold uppercase tracking-wider text-[#6b5a4c] dark:text-[#9c8a7a] px-4 py-3 bg-white/5;
+}
+.neu-table td {
+  @apply px-4 py-3 text-sm border-t border-white/5;
+}
