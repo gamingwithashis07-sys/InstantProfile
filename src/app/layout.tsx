@@ -10,6 +10,12 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'InstantProfile - Instagram Automation',
   description: 'Powerful Instagram automation platform with smart tools',
+  icons: { icon: '/logo.png', apple: '/logo.png' },
+  openGraph: {
+    title: 'InstantProfile - Instagram Automation',
+    description: 'Powerful Instagram automation platform with smart tools',
+    images: [{ url: '/logo.png' }],
+  },
 }
 
 export default function RootLayout({
