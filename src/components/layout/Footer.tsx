@@ -78,8 +78,8 @@ export function Footer() {
             &copy; {new Date().getFullYear()} InstantProfile. Made with <Heart className="w-3 h-3 text-red-400" fill="#f87171" /> for the community.
           </p>
           <div className="flex items-center gap-4 text-xs text-[#9c8a7a]">
-            <Link href="#" className="hover:text-[#f4a261] transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-[#f4a261] transition-colors">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-[#f4a261] transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-[#f4a261] transition-colors">Terms of Service</Link>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}

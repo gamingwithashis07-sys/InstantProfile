@@ -1,7 +1,5 @@
 'use client'
 
-'use client'
-
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
@@ -259,6 +257,10 @@ export default function HomePage() {
       {/* ─── FOOTER ─── */}
       <footer className="text-center py-8 text-sm text-[#9c8a7a] border-t border-white/10">
         <p>&copy; {new Date().getFullYear()} InstantProfile. All rights reserved. Built on the Instagram Graph API.</p>
+        <div className="flex justify-center gap-4 mt-3">
+          <Link href="/privacy" className="hover:text-[#f4a261] transition-colors">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-[#f4a261] transition-colors">Terms of Service</Link>
+        </div>
       </footer>
     </div>
   )
