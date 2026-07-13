@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard, MessageSquare, Camera, Bell, Hash, BarChart3, Instagram,
-  User, Settings, ChevronLeft, ChevronRight, Home, LogOut, Zap, ShoppingCart, Bot, Wallet
+  User, Settings, ChevronLeft, ChevronRight, Home, LogOut, Zap, ShoppingCart, Bot, Wallet, Crown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
@@ -79,6 +79,17 @@ export function UserSidebar() {
       })}
 
       <div className="mt-auto pt-4 border-t border-white/10 space-y-1">
+        <Link href="/dashboard/upgrade">
+          <motion.div
+            whileHover={{ x: 4 }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-[12px] bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-500 hover:from-amber-500/30 hover:to-orange-500/30 transition-all"
+          >
+            <Crown className="w-5 h-5 shrink-0" />
+            <span className={cn('text-sm font-semibold whitespace-nowrap', collapsed && 'hidden')}>
+              Upgrade to Pro
+            </span>
+          </motion.div>
+        </Link>
         <Link href="/">
           <motion.div
             whileHover={{ x: 4 }}

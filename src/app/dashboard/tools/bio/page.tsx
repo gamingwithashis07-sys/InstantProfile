@@ -5,27 +5,44 @@ import { motion } from 'framer-motion'
 import { ClayCard } from '@/components/ui/ClayCard'
 import { NeuButton } from '@/components/ui/NeuButton'
 import { NeuInput } from '@/components/ui/NeuInput'
+import { NeuSelect } from '@/components/ui/NeuSelect'
 import { useToast } from '@/components/ui/Toast'
-import { Layout, Plus, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { Layout, Plus, ExternalLink, Trash2, User } from 'lucide-react'
 
 export default function BioPagePage() {
   const [pages, setPages] = useState<any[]>([])
+  const [themes, setThemes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ title: '', bio: '', username: '', avatar_url: '', theme_color: '#f4a261' })
+  const [form, setForm] = useState({ title: '', bio: '', username: '', avatar_url: '', theme_color: '#f4a261', theme_id: '' })
   const { showToast } = useToast()
 
   useEffect(() => {
-    fetch('/api/bio').then(r => r.json()).then(d => { setPages(d); setLoading(false) })
+    Promise.all([
+      fetch('/api/bio').then(r => r.json()),
+      fetch('/api/admin/themes').then(r => r.json()).catch(() => []),
+    ]).then(([d, t]) => { setPages(d); setThemes(t); setLoading(false) })
   }, [])
 
   const createPage = async (e: React.FormEvent) => {
     e.preventDefault()
-    const r = await fetch('/api/bio', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+    const r = await fetch('/api/bio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, theme_id: form.theme_id ? Number(form.theme_id) : null }),
+    })
     if (r.ok) { showToast('Bio page created!', 'success'); setShowForm(false); location.reload() }
     else showToast('Username taken!', 'error')
   }
+
+  const deletePage = async (id: number) => {
+    if (!confirm('Delete this bio page?')) return
+    const r = await fetch(`/api/bio?id=${id}`, { method: 'DELETE' })
+    if (r.ok) { showToast('Deleted!', 'success'); location.reload() }
+    else showToast('Failed to delete', 'error')
+  }
+
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -40,8 +57,13 @@ export default function BioPagePage() {
             <NeuInput label="Page Title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required />
             <NeuInput label="Username" value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} required placeholder="your-bio-page" />
             <NeuInput label="Bio" value={form.bio} onChange={e => setForm({ ...form, bio: e.target.value })} />
-            <NeuInput label="Avatar URL" type="url" value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} />
-            <NeuInput label="Theme Color" type="color" value={form.theme_color} onChange={e => setForm({ ...form, theme_color: e.target.value })} />
+            <NeuInput label="Avatar URL (leave blank for default)" type="url" value={form.avatar_url} onChange={e => setForm({ ...form, avatar_url: e.target.value })} />
+            {themes.length > 0 && (
+              <NeuSelect label="Theme" value={form.theme_id} onChange={e => setForm({ ...form, theme_id: e.target.value })} options={[{ value: '', label: 'Custom color' }, ...themes.map((t: any) => ({ value: String(t.id), label: t.name }))]} />
+            )}
+            {!form.theme_id && (
+              <NeuInput label="Theme Color" type="color" value={form.theme_color} onChange={e => setForm({ ...form, theme_color: e.target.value })} />
+            )}
             <NeuButton variant="primary" type="submit">Create Bio Page</NeuButton>
           </form>
         </ClayCard>
@@ -58,14 +80,23 @@ export default function BioPagePage() {
               <ClayCard>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    {p.avatar_url ? <img src={p.avatar_url} className="w-12 h-12 rounded-[14px] object-cover" /> : <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-[#e8a87c] to-[#f4a261] flex items-center justify-center text-white font-bold">{p.title[0]}</div>}
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} className="w-12 h-12 rounded-[14px] object-cover" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-[14px] bg-gradient-to-br from-[#e8a87c] to-[#f4a261] flex items-center justify-center text-white">
+                        <User className="w-6 h-6" />
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-bold">{p.title}</h3>
-                      <p className="text-xs text-[#6b5a4c]">/{p.username}</p>
+                      <p className="text-xs text-[#f4a261]">/{p.username}</p>
                       {p.bio && <p className="text-xs text-[#6b5a4c] mt-1 max-w-md truncate">{p.bio}</p>}
                     </div>
                   </div>
-                  <a href={`/bio/${p.username}`} target="_blank" className="p-2 rounded-[10px] hover:bg-white/20"><ExternalLink className="w-4 h-4" /></a>
+                  <div className="flex items-center gap-2">
+                    <a href={`${siteUrl}/bio/${p.username}`} target="_blank" className="p-2 rounded-[10px] hover:bg-white/20"><ExternalLink className="w-4 h-4" /></a>
+                    <button onClick={() => deletePage(p.id)} className="p-2 rounded-[10px] hover:bg-red-500/20 text-red-400"><Trash2 className="w-4 h-4" /></button>
+                  </div>
                 </div>
               </ClayCard>
             </motion.div>

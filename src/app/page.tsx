@@ -1,5 +1,8 @@
 'use client'
 
+'use client'
+
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Zap, Shield, MessageSquare, Camera, Bell, Hash, BarChart3, Instagram,
@@ -22,6 +25,12 @@ const item = {
 }
 
 export default function HomePage() {
+  const [stats, setStats] = useState({ total_dms_sent: 0, total_posts_scheduled: 0, total_connected_accounts: 0, total_users: 0 })
+
+  useEffect(() => {
+    fetch('/api/stats/public').then(r => r.json()).then(setStats).catch(() => {})
+  }, [])
+
   return (
     <div>
       {/* ─── HERO ─── */}
@@ -214,10 +223,10 @@ export default function HomePage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-6"
         >
           {[
-            { end: 50000, label: 'DMs Sent', suffix: '+' },
-            { end: 12000, label: 'Posts Scheduled', suffix: '+' },
-            { end: 150, label: 'Connected Accounts', suffix: '+' },
-            { end: 99.9, label: 'Uptime', suffix: '%' },
+            { end: stats.total_dms_sent || 0, label: 'DMs Sent', suffix: '+' },
+            { end: stats.total_posts_scheduled || 0, label: 'Posts Scheduled', suffix: '+' },
+            { end: stats.total_connected_accounts || 0, label: 'Connected Accounts', suffix: '+' },
+            { end: stats.total_users || 0, label: 'Active Users', suffix: '+' },
           ].map((stat, i) => (
             <ClayCard key={i} hover={false} className="text-center">
               <div className="text-3xl md:text-4xl font-black text-[#f4a261]">
@@ -249,7 +258,7 @@ export default function HomePage() {
 
       {/* ─── FOOTER ─── */}
       <footer className="text-center py-8 text-sm text-[#9c8a7a] border-t border-white/10">
-        <p>&copy; 2024 InstantProfile. All rights reserved. Built on the Instagram Graph API.</p>
+        <p>&copy; {new Date().getFullYear()} InstantProfile. All rights reserved. Built on the Instagram Graph API.</p>
       </footer>
     </div>
   )

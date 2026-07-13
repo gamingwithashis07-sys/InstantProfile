@@ -9,6 +9,14 @@ export async function POST(req: NextRequest) {
   if (!ig_account_id || !recipient_username || !message) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) return unauthorized()
+
+  if (user.dmMonthlyUsage >= user.dmLimit) {
+    return NextResponse.json({ error: `DM limit reached (${user.dmLimit}/month). Upgrade to Pro for unlimited DMs.` }, { status: 429 })
+  }
+
   const queueItem = await prisma.dmQueue.create({
     data: {
       igAccountId: ig_account_id,
@@ -18,13 +26,18 @@ export async function POST(req: NextRequest) {
       campaignId: campaign_id || null,
     },
   })
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { dmMonthlyUsage: { increment: 1 } },
+  })
+
   if (campaign_id) {
     await prisma.dmCampaign.update({
       where: { id: campaign_id },
       data: { sentCount: { increment: 1 } },
     })
   }
-  const user = await prisma.user.findUnique({ where: { id: userId } })
   if (user) logActivity(user.username, 'queued DM', `to ${recipient_username}`, message.substring(0, 50))
   return NextResponse.json({ id: queueItem.id, status: 'pending' })
 }

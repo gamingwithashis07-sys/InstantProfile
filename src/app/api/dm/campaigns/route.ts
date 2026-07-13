@@ -25,6 +25,12 @@ export async function POST(req: NextRequest) {
   if (!ig_account_id || !name || !message_template) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (user && user.plan === 'starter' && trigger_type && !['manual', 'comment'].includes(trigger_type)) {
+    return NextResponse.json({ error: 'Starter plan only supports manual and comment→DM triggers. Upgrade to Pro for advanced triggers.' }, { status: 403 })
+  }
+
   const settingsJson = settings ? (typeof settings === 'string' ? settings : JSON.stringify(settings)) : '{}'
   const campaign = await prisma.dmCampaign.create({
     data: {
@@ -36,7 +42,6 @@ export async function POST(req: NextRequest) {
       settings: settingsJson,
     },
   })
-  const user = await prisma.user.findUnique({ where: { id: userId } })
   if (user) logActivity(user.username, 'created', `DM Campaign: ${name}`, '')
   return NextResponse.json({ id: campaign.id, name, status: 'draft' })
 }

@@ -26,8 +26,8 @@ export default function LinkShortenerPage() {
     else showToast('Failed', 'error')
   }
 
-  const copyLink = (slug: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/go/${slug}`)
+  const copyLink = (url: string) => {
+    navigator.clipboard.writeText(url)
     showToast('Copied!', 'success')
   }
 
@@ -62,12 +62,12 @@ export default function LinkShortenerPage() {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{l.title || l.slug}</p>
                     <p className="text-xs text-[#6b5a4c] truncate">{l.target_url}</p>
-                    <p className="text-xs text-[#f4a261] mt-0.5">{window.location.origin}/go/{l.slug}</p>
+                    <p className="text-xs text-[#f4a261] mt-0.5">{l.short_url}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-4">
                     <span className="text-xs text-[#6b5a4c]">{l.clicks} clicks</span>
-                    <button onClick={() => copyLink(l.slug)} className="p-2 rounded-[10px] hover:bg-white/20"><Copy className="w-4 h-4" /></button>
-                    <a href={`/go/${l.slug}`} target="_blank" className="p-2 rounded-[10px] hover:bg-white/20"><ExternalLink className="w-4 h-4" /></a>
+                    <button onClick={() => copyLink(l.short_url)} className="p-2 rounded-[10px] hover:bg-white/20"><Copy className="w-4 h-4" /></button>
+                    <a href={l.short_url} target="_blank" className="p-2 rounded-[10px] hover:bg-white/20"><ExternalLink className="w-4 h-4" /></a>
                   </div>
                 </div>
               </ClayCard>

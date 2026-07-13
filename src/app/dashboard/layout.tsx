@@ -1,14 +1,33 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import { useUser, SignInButton, SignUpButton } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
+import { usePathname, useRouter } from 'next/navigation'
 import { UserSidebar } from '@/components/layout/UserSidebar'
 import { GlassCard } from '@/components/ui/GlassCard'
+import { NeuButton } from '@/components/ui/NeuButton'
+import UpgradePopup from '@/components/UpgradePopup'
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  const { isLoaded, isSignedIn } = useUser()
+  const { isLoaded, isSignedIn, user } = useUser()
   const [isRegister, setIsRegister] = useState(false)
+  const [plan, setPlan] = useState<string | null>(null)
+  const [hasIgAccount, setHasIgAccount] = useState<boolean | null>(null)
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isSignedIn) return
+    fetch('/api/user/plan').then(r => r.json()).then(d => {
+      setPlan(d.plan)
+      if (d.plan === 'starter') setShowUpgrade(true)
+    })
+    fetch('/api/ig/connect').then(r => r.json()).then(d => {
+      setHasIgAccount(Array.isArray(d) && d.length > 0)
+    })
+  }, [isSignedIn])
 
   if (!isLoaded) {
     return (
@@ -63,6 +82,25 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     )
   }
 
+  const isIgRoute = pathname.startsWith('/dashboard/accounts')
+  if (hasIgAccount === false && !isIgRoute && !pathname.startsWith('/dashboard/settings') && !pathname.startsWith('/dashboard/profile') && !pathname.startsWith('/dashboard/earnings')) {
+    return (
+      <div className="flex min-h-screen">
+        <UserSidebar />
+        <div className="flex-1 ml-[240px] p-6 md:p-8 flex items-center justify-center">
+          <GlassCard className="p-10 max-w-lg text-center">
+            <div className="text-6xl mb-4">📱</div>
+            <h2 className="text-2xl font-bold mb-2">Connect Your Instagram Account</h2>
+            <p className="text-[#6b5a4c] dark:text-[#9c8a7a] mb-6">You need to connect an Instagram Business or Creator account before using any tools.</p>
+            <NeuButton variant="primary" onClick={() => router.push('/dashboard/accounts')}>
+              Connect Instagram
+            </NeuButton>
+          </GlassCard>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen">
       <UserSidebar />
@@ -74,6 +112,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </motion.div>
+      {showUpgrade && plan === 'starter' && (
+        <UpgradePopup onClose={() => setShowUpgrade(false)} />
+      )}
     </div>
   )
 }

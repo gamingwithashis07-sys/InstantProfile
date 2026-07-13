@@ -8,26 +8,43 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  clerkId   String   @unique @default("")
-  username  String   @unique
-  password  String   @default("")
-  role      String   @default("user")
-  balance   Float    @default(0)
-  createdAt DateTime @default(now()) @map("created_at")
+  id             Int      @id @default(autoincrement())
+  clerkId        String   @unique @default("")
+  username       String   @unique
+  password       String   @default("")
+  role           String   @default("user")
+  plan           String   @default("starter")
+  dmMonthlyUsage Int      @default(0) @map("dm_monthly_usage")
+  dmLimit        Int      @default(1000) @map("dm_limit")
+  balance        Float    @default(0)
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  igAccounts      IgAccount[]
-  shortLinks      ShortLink[]
-  bioPages        BioPage[]
-  contentIdeas    ContentIdea[]
+  igAccounts       IgAccount[]
+  shortLinks       ShortLink[]
+  bioPages         BioPage[]
+  contentIdeas     ContentIdea[]
   captionTemplates CaptionTemplate[]
-  qrCodes         QrCode[]
-  products        Product[]
-  digitalOrders   DigitalOrder[]
-  transactions    Transaction[]
-  activityLogs    ActivityLog[]
+  qrCodes          QrCode[]
+  products         Product[]
+  digitalOrders    DigitalOrder[]
+  transactions     Transaction[]
+  activityLogs     ActivityLog[]
 
   @@map("users")
+}
+
+model BioTheme {
+  id        Int      @id @default(autoincrement())
+  name      String
+  colors    String
+  cssUrl    String?  @map("css_url")
+  previewUrl String? @map("preview_url")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  bioPages BioPage[]
+
+  @@map("bio_themes")
 }
 
 model ActivityLog {
@@ -205,11 +222,13 @@ model BioPage {
   bio        String?
   avatarUrl  String?  @map("avatar_url")
   themeColor String   @default("#f4a261") @map("theme_color")
+  themeId    Int?     @map("theme_id")
   username   String   @unique
   createdAt  DateTime @default(now()) @map("created_at")
 
   user  User      @relation(fields: [userId], references: [id])
   links BioLink[]
+  theme BioTheme? @relation(fields: [themeId], references: [id])
 
   @@map("bio_pages")
 }
