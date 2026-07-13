@@ -1,35 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB, logActivity } from '@/lib/db'
-import { getSession, unauthorized, forbidden } from '@/lib/auth'
+import { auth, clerkClient } from '@clerk/nextjs/server'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, forbidden, logActivity } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  if (session.role !== 'admin') return forbidden()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const { userId: clerkId } = await auth()
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkId!)
+  if (clerkUser.publicMetadata.role !== 'admin') return forbidden()
 
-  await initDB()
-  const db = getDB()
-  const campaigns = db.all(
-    'SELECT dc.*, ia.ig_username as account_username FROM dm_campaigns dc LEFT JOIN ig_accounts ia ON dc.ig_account_id = ia.id ORDER BY dc.created_at DESC'
-  )
+  const campaigns = await prisma.dmCampaign.findMany({
+    include: { igAccount: { select: { igUsername: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
   return NextResponse.json(campaigns)
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  if (session.role !== 'admin') return forbidden()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const { userId: clerkId } = await auth()
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkId!)
+  if (clerkUser.publicMetadata.role !== 'admin') return forbidden()
 
-  await initDB()
-  const db = getDB()
   const { ig_account_id, name, message_template, trigger_type, delay_minutes } = await req.json()
   if (!ig_account_id || !name || !message_template) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
-  const result = db.run(
-    'INSERT INTO dm_campaigns (ig_account_id, name, message_template, trigger_type, delay_minutes) VALUES (?, ?, ?, ?, ?)',
-    [ig_account_id, name, message_template, trigger_type || 'manual', delay_minutes || 0]
-  )
-  logActivity(session.username, 'created', `Campaign: ${name}`, `Trigger: ${trigger_type || 'manual'}`)
-  return NextResponse.json({ id: result.lastInsertRowid, name, status: 'draft' })
+  const campaign = await prisma.dmCampaign.create({
+    data: {
+      igAccountId: Number(ig_account_id),
+      name,
+      messageTemplate: message_template,
+      triggerType: trigger_type || 'manual',
+      delayMinutes: delay_minutes || 0,
+    },
+  })
+  await logActivity(clerkUser.username || 'admin', 'created', `Campaign: ${name}`, `Trigger: ${trigger_type || 'manual'}`)
+  return NextResponse.json({ id: campaign.id, name, status: 'draft' })
 }

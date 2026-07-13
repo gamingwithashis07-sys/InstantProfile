@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  return NextResponse.json(getDB().all('SELECT * FROM caption_templates WHERE user_id = ? ORDER BY created_at DESC', [session.userId]))
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const templates = await prisma.captionTemplate.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  })
+  return NextResponse.json(templates)
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { title, content, category } = await req.json()
   if (!title || !content) return NextResponse.json({ error: 'Title and content required' }, { status: 400 })
-  const r = getDB().run('INSERT INTO caption_templates (user_id, title, content, category) VALUES (?, ?, ?, ?)', [session.userId, title, content, category || 'general'])
-  return NextResponse.json({ id: r.lastInsertRowid })
+  const template = await prisma.captionTemplate.create({
+    data: { userId, title, content, category: category || 'general' },
+  })
+  return NextResponse.json({ id: template.id })
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession, unauthorized } from '@/lib/auth'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 const IDEAS = [
   'Monday Motivation quote', 'Behind the scenes photo', 'Customer testimonial', 'Product feature spotlight',
@@ -11,8 +11,8 @@ const IDEAS = [
 ]
 
 export async function GET(req: Request) {
-  const session = await getSession()
-  if (!session) return unauthorized()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const url = new URL(req.url)
   const count = parseInt(url.searchParams.get('count') || '7')
   const shuffled = [...IDEAS].sort(() => Math.random() - 0.5).slice(0, count)

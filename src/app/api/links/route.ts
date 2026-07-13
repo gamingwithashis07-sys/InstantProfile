@@ -1,26 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized } from '@/lib/helpers'
 import crypto from 'crypto'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const links = getDB().all('SELECT * FROM short_links WHERE user_id = ? ORDER BY created_at DESC', [session.userId])
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const links = await prisma.shortLink.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  })
   return NextResponse.json(links)
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { target_url, title, slug } = await req.json()
   if (!target_url) return NextResponse.json({ error: 'Target URL required' }, { status: 400 })
   const finalSlug = slug || crypto.randomBytes(4).toString('hex')
   try {
-    db.run('INSERT INTO short_links (user_id, slug, target_url, title) VALUES (?, ?, ?, ?)', [session.userId, finalSlug, target_url, title || ''])
+    const link = await prisma.shortLink.create({
+      data: { userId, slug: finalSlug, targetUrl: target_url, title: title || '' },
+    })
     return NextResponse.json({ slug: finalSlug, short_url: `/go/${finalSlug}`, target_url })
   } catch {
     return NextResponse.json({ error: 'Slug already taken' }, { status: 409 })

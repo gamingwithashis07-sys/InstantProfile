@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
-  const queue = db.all(
-    `SELECT q.*, a.ig_username as account_name FROM dm_queue q
-     JOIN ig_accounts a ON q.ig_account_id = a.id
-     WHERE a.user_id = ? ORDER BY q.created_at DESC LIMIT 50`,
-    [session.userId]
-  )
-  return NextResponse.json(queue)
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const queue = await prisma.dmQueue.findMany({
+    where: { igAccount: { userId } },
+    include: { igAccount: { select: { igUsername: true } } },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  })
+  const mapped = queue.map(q => ({
+    ...q,
+    account_name: q.igAccount.igUsername,
+    igAccount: undefined,
+  }))
+  return NextResponse.json(mapped)
 }

@@ -18,7 +18,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
             <Link href="/" className="text-2xl font-extrabold tracking-tight" style={{ color: accent }}>
-              InstaAutomate
+              InstantProfile
             </Link>
             <p className="mt-3 text-sm text-[#6b5a4c] dark:text-[#9c8a7a] max-w-sm leading-relaxed">
               The most reliable Instagram automation platform. Automate DMs,
@@ -75,7 +75,7 @@ export function Footer() {
 
         <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#9c8a7a] flex items-center gap-1">
-            &copy; {new Date().getFullYear()} InstaAutomate. Made with <Heart className="w-3 h-3 text-red-400" fill="#f87171" /> for the community.
+            &copy; {new Date().getFullYear()} InstantProfile. Made with <Heart className="w-3 h-3 text-red-400" fill="#f87171" /> for the community.
           </p>
           <div className="flex items-center gap-4 text-xs text-[#9c8a7a]">
             <Link href="#" className="hover:text-[#f4a261] transition-colors">Privacy Policy</Link>

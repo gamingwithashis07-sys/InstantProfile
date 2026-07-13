@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getSession, unauthorized } from '@/lib/auth'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session) return unauthorized()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { competitors } = await req.json()
   if (!competitors || !Array.isArray(competitors) || competitors.length === 0) {
     return NextResponse.json({ error: 'Provide at least one competitor username' }, { status: 400 })

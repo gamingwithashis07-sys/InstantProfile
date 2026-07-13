@@ -1,39 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB, logActivity } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, logActivity } from '@/lib/helpers'
 
 export async function GET() {
-  await initDB()
-  const db = getDB()
-  const session = await getSession()
-  if (!session) return unauthorized()
-  const queue = db.all(
-    `SELECT dq.*, dc.name as campaign_name, ia.ig_username as account_username
-     FROM dm_queue dq
-     LEFT JOIN dm_campaigns dc ON dq.campaign_id = dc.id
-     LEFT JOIN ig_accounts ia ON dq.ig_account_id = ia.id
-     WHERE ia.user_id = ?
-     ORDER BY dq.created_at DESC`,
-    [session.userId]
-  )
-  return NextResponse.json(queue)
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const queue = await prisma.dmQueue.findMany({
+    where: { igAccount: { userId } },
+    include: {
+      campaign: { select: { name: true } },
+      igAccount: { select: { igUsername: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+  const mapped = queue.map(q => ({
+    ...q,
+    campaign_name: q.campaign?.name || null,
+    account_username: q.igAccount.igUsername,
+    campaign: undefined,
+    igAccount: undefined,
+  }))
+  return NextResponse.json(mapped)
 }
 
 export async function POST(req: NextRequest) {
-  await initDB()
-  const db = getDB()
-  const session = await getSession()
-  if (!session) return unauthorized()
-
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { campaign_id, ig_account_id, recipient_username, message } = await req.json()
   if (!ig_account_id || !recipient_username || !message) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
-
-  const result = db.run(
-    'INSERT INTO dm_queue (campaign_id, ig_account_id, recipient_username, message, status) VALUES (?, ?, ?, ?, ?)',
-    [campaign_id || null, ig_account_id, recipient_username, message, 'pending']
-  )
-  logActivity(session.username, 'queued dm', `#${result.lastInsertRowid}`, `${recipient_username}`)
-  return NextResponse.json({ id: result.lastInsertRowid, status: 'pending' })
+  const result = await prisma.dmQueue.create({
+    data: {
+      campaignId: campaign_id || null,
+      igAccountId: ig_account_id,
+      recipientUsername: recipient_username,
+      message,
+      status: 'pending',
+    },
+  })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  await logActivity(user?.username || '', 'queued dm', `#${result.id}`, `${recipient_username}`)
+  return NextResponse.json({ id: result.id, status: 'pending' })
 }

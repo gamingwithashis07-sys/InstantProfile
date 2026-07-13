@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession, unauthorized } from '@/lib/auth'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 const TEMPLATES = [
   { id: 1, name: 'Q&A', description: 'Ask me anything', colors: ['#f4a261', '#e8a87c'] },
@@ -13,7 +13,7 @@ const TEMPLATES = [
 ]
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   return NextResponse.json(TEMPLATES)
 }

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getSession, unauthorized } from '@/lib/auth'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const times = [
     { day: 'Monday', best: '11:00 AM', score: 92 },
     { day: 'Tuesday', best: '10:00 AM', score: 88 },

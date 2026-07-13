@@ -1,18 +1,23 @@
 import { NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized, forbidden } from '@/lib/auth'
+import { auth, clerkClient } from '@clerk/nextjs/server'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, forbidden } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  if (session.role !== 'admin') return forbidden()
-  await initDB()
-  const db = getDB()
-  const campaigns = db.all(
-    `SELECT c.*, u.username, a.ig_username FROM dm_campaigns c
-     JOIN ig_accounts a ON c.ig_account_id = a.id
-     JOIN users u ON a.user_id = u.id
-     ORDER BY c.created_at DESC`
-  )
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const { userId: clerkId } = await auth()
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkId!)
+  if (clerkUser.publicMetadata.role !== 'admin') return forbidden()
+
+  const campaigns = await prisma.dmCampaign.findMany({
+    include: {
+      igAccount: {
+        include: { user: { select: { username: true } } },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
   return NextResponse.json(campaigns)
 }

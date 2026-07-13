@@ -1,35 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB, logActivity } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, logActivity } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
-  const campaigns = db.all(
-    `SELECT c.*, a.ig_username FROM dm_campaigns c
-     JOIN ig_accounts a ON c.ig_account_id = a.id
-     WHERE a.user_id = ? ORDER BY c.created_at DESC`,
-    [session.userId]
-  )
-  return NextResponse.json(campaigns)
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const campaigns = await prisma.dmCampaign.findMany({
+    where: { igAccount: { userId } },
+    include: { igAccount: { select: { igUsername: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
+  const mapped = campaigns.map(c => ({
+    ...c,
+    ig_username: c.igAccount.igUsername,
+    igAccount: undefined,
+  }))
+  return NextResponse.json(mapped)
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { ig_account_id, name, message_template, trigger_type, delay_minutes, settings } = await req.json()
   if (!ig_account_id || !name || !message_template) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
   const settingsJson = settings ? (typeof settings === 'string' ? settings : JSON.stringify(settings)) : '{}'
-  const result = db.run(
-    'INSERT INTO dm_campaigns (ig_account_id, name, message_template, trigger_type, delay_minutes, settings) VALUES (?, ?, ?, ?, ?, ?)',
-    [ig_account_id, name, message_template, trigger_type || 'manual', delay_minutes || 0, settingsJson]
-  )
-  logActivity(session.username, 'created', `DM Campaign: ${name}`, '')
-  return NextResponse.json({ id: result.lastInsertRowid, name, status: 'draft' })
+  const campaign = await prisma.dmCampaign.create({
+    data: {
+      igAccountId: ig_account_id,
+      name,
+      messageTemplate: message_template,
+      triggerType: trigger_type || 'manual',
+      delayMinutes: delay_minutes || 0,
+      settings: settingsJson,
+    },
+  })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (user) logActivity(user.username, 'created', `DM Campaign: ${name}`, '')
+  return NextResponse.json({ id: campaign.id, name, status: 'draft' })
 }

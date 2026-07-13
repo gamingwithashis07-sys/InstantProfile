@@ -1,25 +1,32 @@
 import { NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
 
-  const accounts = db.all('SELECT * FROM ig_accounts WHERE user_id = ?', [session.userId])
-  const dmSent = db.get('SELECT COUNT(*) as c FROM dm_queue q JOIN ig_accounts a ON q.ig_account_id = a.id WHERE a.user_id = ? AND q.status = ?', [session.userId, 'sent'])
-  const totalPosts = db.get('SELECT COUNT(*) as c FROM scheduled_posts p JOIN ig_accounts a ON p.ig_account_id = a.id WHERE a.user_id = ?', [session.userId])
-  const autoReplies = db.get('SELECT COUNT(*) as c FROM auto_replies r JOIN ig_accounts a ON r.ig_account_id = a.id WHERE a.user_id = ?', [session.userId])
-  const followerCount = db.get('SELECT SUM(follower_count) as c FROM ig_accounts WHERE user_id = ?', [session.userId])
+  const accounts = await prisma.igAccount.findMany({ where: { userId } })
+  const dmSent = await prisma.dmQueue.count({
+    where: { igAccount: { userId }, status: 'sent' },
+  })
+  const totalPosts = await prisma.scheduledPost.count({
+    where: { igAccount: { userId } },
+  })
+  const autoReplies = await prisma.autoReply.count({
+    where: { igAccount: { userId } },
+  })
+  const followerAgg = await prisma.igAccount.aggregate({
+    where: { userId },
+    _sum: { followerCount: true },
+  })
 
   return NextResponse.json({
     totalAccounts: accounts.length,
-    totalDmSent: dmSent?.c || 0,
-    totalPosts: totalPosts?.c || 0,
-    totalAutoReplies: autoReplies?.c || 0,
-    followerGrowth: Math.round((followerCount?.c || 0) * 0.08),
+    totalDmSent: dmSent,
+    totalPosts,
+    totalAutoReplies: autoReplies,
+    followerGrowth: Math.round((followerAgg._sum.followerCount || 0) * 0.08),
     engagementRate: 4.2,
     accounts,
   })

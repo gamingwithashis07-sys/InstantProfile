@@ -1,55 +1,30 @@
 'use client'
 
-import { useEffect, useState, ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import { ReactNode, useEffect, useState } from 'react'
+import { useUser, SignInButton } from '@clerk/nextjs'
 import { motion } from 'framer-motion'
 import { AdminSidebar } from '@/components/layout/AdminSidebar'
-import { NeuInput } from '@/components/ui/NeuInput'
-import { NeuButton } from '@/components/ui/NeuButton'
 import { GlassCard } from '@/components/ui/GlassCard'
-import { useToast } from '@/components/ui/Toast'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const [authed, setAuthed] = useState(false)
+  const { isLoaded, isSignedIn, user } = useUser()
+  const [isAdmin, setIsAdmin] = useState(false)
   const [checking, setChecking] = useState(true)
-  const [loginUser, setLoginUser] = useState('')
-  const [loginPass, setLoginPass] = useState('')
-  const [loginSecret, setLoginSecret] = useState('')
-  const [loginLoading, setLoginLoading] = useState(false)
-  const [loginError, setLoginError] = useState('')
-  const router = useRouter()
-  const { showToast } = useToast()
 
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then(r => r.json())
-      .then(data => {
-        if (data.role === 'admin') setAuthed(true)
+    async function check() {
+      if (!isSignedIn || !user) {
         setChecking(false)
-      })
-      .catch(() => setChecking(false))
-  }, [])
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoginLoading(true)
-    setLoginError('')
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: loginUser, password: loginPass, secret_code: loginSecret }),
-    })
-    const data = await res.json()
-    setLoginLoading(false)
-    if (data.role === 'admin') {
-      setAuthed(true)
-      showToast('Welcome back!', 'success')
-    } else {
-      setLoginError(data.error || 'Invalid credentials')
+        return
+      }
+      const role = user.publicMetadata?.role as string
+      setIsAdmin(role === 'admin')
+      setChecking(false)
     }
-  }
+    if (isLoaded) check()
+  }, [isLoaded, isSignedIn, user])
 
-  if (checking) {
+  if (!isLoaded || checking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[#f4a261] border-t-transparent rounded-full animate-spin" />
@@ -57,7 +32,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     )
   }
 
-  if (!authed) {
+  if (!isSignedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <motion.div
@@ -69,19 +44,27 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <div className="text-center mb-8">
               <div className="text-5xl mb-4">⚙️</div>
               <h2 className="text-2xl font-bold">Admin Login</h2>
-              <p className="text-sm text-[#6b5a4c] dark:text-[#9c8a7a] mt-2">Enter your credentials to continue</p>
+              <p className="text-sm text-[#6b5a4c] dark:text-[#9c8a7a] mt-2">Sign in to continue</p>
             </div>
-              <form onSubmit={handleLogin} className="flex flex-col gap-4">
-              <NeuInput label="Username" placeholder="admin" value={loginUser} onChange={e => setLoginUser(e.target.value)} required />
-              <NeuInput label="Password" type="password" placeholder="••••••" value={loginPass} onChange={e => setLoginPass(e.target.value)} required />
-              <NeuInput label="Secret Code" type="password" placeholder="admin secret" value={loginSecret} onChange={e => setLoginSecret(e.target.value)} required />
-              {loginError && <p className="text-red-400 text-sm text-center">{loginError}</p>}
-              <NeuButton variant="primary" size="lg" type="submit" loading={loginLoading}>
-                {loginLoading ? 'Logging in...' : 'Login'}
-              </NeuButton>
-            </form>
+            <SignInButton mode="modal" fallbackRedirectUrl="/admin">
+              <button className="w-full py-3 px-6 rounded-[12px] bg-[#f4a261] text-white font-semibold hover:bg-[#e8913d] transition-all">
+                Sign In
+              </button>
+            </SignInButton>
           </GlassCard>
         </motion.div>
+      </div>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <GlassCard className="p-8 text-center">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+          <p className="text-sm text-[#6b5a4c] dark:text-[#9c8a7a]">Admin privileges required</p>
+        </GlassCard>
       </div>
     )
   }

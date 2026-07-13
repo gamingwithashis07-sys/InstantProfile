@@ -1,17 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
-  const scheduled = db.all(
-    `SELECT p.*, a.ig_username FROM scheduled_posts p
-     JOIN ig_accounts a ON p.ig_account_id = a.id
-     WHERE a.user_id = ? AND p.status = 'scheduled' ORDER BY p.scheduled_at ASC`,
-    [session.userId]
-  )
-  return NextResponse.json(scheduled)
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const scheduled = await prisma.scheduledPost.findMany({
+    where: { igAccount: { userId }, status: 'scheduled' },
+    include: { igAccount: { select: { igUsername: true } } },
+    orderBy: { scheduledAt: 'asc' },
+  })
+  const mapped = scheduled.map(p => ({
+    ...p,
+    ig_username: p.igAccount.igUsername,
+    igAccount: undefined,
+  }))
+  return NextResponse.json(mapped)
 }

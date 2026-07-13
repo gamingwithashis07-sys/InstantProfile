@@ -1,24 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized, forbidden } from '@/lib/auth'
+import { auth, clerkClient } from '@clerk/nextjs/server'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, forbidden } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  if (session.role !== 'admin') return forbidden()
-  await initDB()
-  const db = getDB()
-  const accounts = db.all('SELECT i.*, u.username FROM ig_accounts i JOIN users u ON i.user_id = u.id ORDER BY i.created_at DESC')
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const { userId: clerkId } = await auth()
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkId!)
+  if (clerkUser.publicMetadata.role !== 'admin') return forbidden()
+
+  const accounts = await prisma.igAccount.findMany({
+    include: { user: { select: { username: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
   return NextResponse.json(accounts)
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  if (session.role !== 'admin') return forbidden()
-  await initDB()
-  const db = getDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const { userId: clerkId } = await auth()
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkId!)
+  if (clerkUser.publicMetadata.role !== 'admin') return forbidden()
+
   const { id } = await req.json()
-  db.run('DELETE FROM ig_accounts WHERE id = ?', [id])
+  await prisma.igAccount.delete({ where: { id: Number(id) } })
   return NextResponse.json({ success: true })
 }

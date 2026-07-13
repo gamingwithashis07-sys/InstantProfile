@@ -1,23 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB, logActivity } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, logActivity } from '@/lib/helpers'
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  const db = getDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { ig_account_id, recipient_username, message, campaign_id } = await req.json()
   if (!ig_account_id || !recipient_username || !message) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
-  const result = db.run(
-    'INSERT INTO dm_queue (ig_account_id, recipient_username, message, status, campaign_id) VALUES (?, ?, ?, ?, ?)',
-    [ig_account_id, recipient_username, message, 'pending', campaign_id || null]
-  )
+  const queueItem = await prisma.dmQueue.create({
+    data: {
+      igAccountId: ig_account_id,
+      recipientUsername: recipient_username,
+      message,
+      status: 'pending',
+      campaignId: campaign_id || null,
+    },
+  })
   if (campaign_id) {
-    db.run('UPDATE dm_campaigns SET sent_count = sent_count + 1 WHERE id = ?', [campaign_id])
+    await prisma.dmCampaign.update({
+      where: { id: campaign_id },
+      data: { sentCount: { increment: 1 } },
+    })
   }
-  logActivity(session.username, 'queued DM', `to ${recipient_username}`, message.substring(0, 50))
-  return NextResponse.json({ id: result.lastInsertRowid, status: 'pending' })
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (user) logActivity(user.username, 'queued DM', `to ${recipient_username}`, message.substring(0, 50))
+  return NextResponse.json({ id: queueItem.id, status: 'pending' })
 }

@@ -1,36 +1,41 @@
 import { NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized, forbidden } from '@/lib/auth'
+import { auth, clerkClient } from '@clerk/nextjs/server'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized, forbidden } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  if (session.role !== 'admin') return forbidden()
-  await initDB()
-  const db = getDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const { userId: clerkId } = await auth()
+  const client = await clerkClient()
+  const clerkUser = await client.users.getUser(clerkId!)
+  if (clerkUser.publicMetadata.role !== 'admin') return forbidden()
 
-  const totalUsers = db.get('SELECT COUNT(*) as c FROM users')
-  const totalAccounts = db.get('SELECT COUNT(*) as c FROM ig_accounts')
-  const totalDmSent = db.get('SELECT COUNT(*) as c FROM dm_queue WHERE status = ?', ['sent'])
-  const totalPosts = db.get('SELECT COUNT(*) as c FROM scheduled_posts')
-  const totalAutoReplies = db.get('SELECT COUNT(*) as c FROM auto_replies')
-  const totalDmPending = db.get('SELECT COUNT(*) as c FROM dm_queue WHERE status = ?', ['pending'])
-  const totalDmCampaigns = db.get('SELECT COUNT(*) as c FROM dm_campaigns')
-  const totalProducts = db.get('SELECT COUNT(*) as c FROM products')
-  const totalOrders = db.get('SELECT COUNT(*) as c FROM digital_orders WHERE status = ?', ['completed'])
-  const totalRevenue = db.get('SELECT COALESCE(SUM(amount), 0) as total FROM digital_orders WHERE status = ?', ['completed'])
-  const totalBalance = db.get('SELECT COALESCE(SUM(balance), 0) as total FROM users')
+  const [totalUsers, totalAccounts, totalDmSent, totalPosts, totalAutoReplies, totalDmPending, totalDmCampaigns, totalProducts, totalOrders, totalRevenue, totalBalance] = await Promise.all([
+    prisma.user.count(),
+    prisma.igAccount.count(),
+    prisma.dmQueue.count({ where: { status: 'sent' } }),
+    prisma.scheduledPost.count(),
+    prisma.autoReply.count(),
+    prisma.dmQueue.count({ where: { status: 'pending' } }),
+    prisma.dmCampaign.count(),
+    prisma.product.count(),
+    prisma.digitalOrder.count({ where: { status: 'completed' } }),
+    prisma.digitalOrder.aggregate({ _sum: { amount: true }, where: { status: 'completed' } }),
+    prisma.user.aggregate({ _sum: { balance: true } }),
+  ])
 
   return NextResponse.json({
-    totalUsers: totalUsers?.c || 0,
-    totalAccounts: totalAccounts?.c || 0,
-    totalDmSent: totalDmSent?.c || 0,
-    totalPosts: totalPosts?.c || 0,
-    totalAutoReplies: totalAutoReplies?.c || 0,
-    totalDmPending: totalDmPending?.c || 0,
-    totalDmCampaigns: totalDmCampaigns?.c || 0,
-    totalProducts: totalProducts?.c || 0,
-    totalOrders: totalOrders?.c || 0,
-    totalRevenue: totalRevenue?.total || 0,
+    totalUsers,
+    totalAccounts,
+    totalDmSent,
+    totalPosts,
+    totalAutoReplies,
+    totalDmPending,
+    totalDmCampaigns,
+    totalProducts,
+    totalOrders,
+    totalRevenue: totalRevenue._sum.amount || 0,
+    totalBalance: totalBalance._sum.balance || 0,
   })
 }

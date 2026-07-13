@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { initDB, getDB } from '@/lib/db'
-import { getSession, unauthorized } from '@/lib/auth'
+import prisma from '@/lib/prisma'
+import { getUserId, unauthorized } from '@/lib/helpers'
 
 export async function GET() {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
-  return NextResponse.json(getDB().all('SELECT * FROM content_ideas WHERE user_id = ? ORDER BY created_at DESC', [session.userId]))
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
+  const ideas = await prisma.contentIdea.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  })
+  return NextResponse.json(ideas)
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getSession()
-  if (!session) return unauthorized()
-  await initDB()
+  const userId = await getUserId()
+  if (!userId) return unauthorized()
   const { idea, category } = await req.json()
   if (!idea) return NextResponse.json({ error: 'Idea required' }, { status: 400 })
-  const r = getDB().run('INSERT INTO content_ideas (user_id, idea, category) VALUES (?, ?, ?)', [session.userId, idea, category || 'general'])
-  return NextResponse.json({ id: r.lastInsertRowid })
+  const created = await prisma.contentIdea.create({
+    data: { userId, idea, category: category || 'general' },
+  })
+  return NextResponse.json({ id: created.id })
 }

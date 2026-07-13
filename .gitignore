@@ -4,3 +4,10 @@ data.db
 *.db
 tsconfig.tsbuildinfo
 .next/trace
+.prisma/
+.env
+.env.local
+.firebase/
+firebase-debug.log
+skills-lock.json
+.agents/

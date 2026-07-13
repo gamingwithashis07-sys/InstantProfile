@@ -43,7 +43,7 @@ export function Navbar() {
           shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
       >
         <Link href="/" className="text-2xl font-extrabold tracking-tight" style={{ color: accent }}>
-          InstaAutomate
+          InstantProfile
         </Link>
 
         <div className="hidden md:flex items-center gap-6">

@@ -1,0 +1,324 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  clerkId   String   @unique @default("")
+  username  String   @unique
+  password  String   @default("")
+  role      String   @default("user")
+  balance   Float    @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  igAccounts      IgAccount[]
+  shortLinks      ShortLink[]
+  bioPages        BioPage[]
+  contentIdeas    ContentIdea[]
+  captionTemplates CaptionTemplate[]
+  qrCodes         QrCode[]
+  products        Product[]
+  digitalOrders   DigitalOrder[]
+  transactions    Transaction[]
+  activityLogs    ActivityLog[]
+
+  @@map("users")
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  action    String
+  target    String?
+  detail    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("activity_log")
+}
+
+model Setting {
+  key   String @id
+  value String
+
+  @@map("settings")
+}
+
+model IgAccount {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  igUserId       String   @map("ig_user_id")
+  igUsername     String   @map("ig_username")
+  igBusinessId   String?  @map("ig_business_id")
+  accessToken    String   @map("access_token")
+  tokenExpiresAt DateTime? @map("token_expires_at")
+  avatarUrl      String?  @map("avatar_url")
+  followerCount  Int      @default(0) @map("follower_count")
+  status         String   @default("active")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user           User             @relation(fields: [userId], references: [id])
+  dmCampaigns    DmCampaign[]
+  dmQueue        DmQueue[]
+  scheduledPosts ScheduledPost[]
+  autoReplies    AutoReply[]
+  hashtagGroups  HashtagGroup[]
+  dmConversations DmConversation[]
+  analyticsCaches AnalyticsCache[]
+
+  @@map("ig_accounts")
+}
+
+model DmCampaign {
+  id              Int      @id @default(autoincrement())
+  igAccountId     Int      @map("ig_account_id")
+  name            String
+  messageTemplate String   @map("message_template")
+  triggerType     String   @default("manual") @map("trigger_type")
+  delayMinutes    Int      @default(0) @map("delay_minutes")
+  status          String   @default("draft")
+  sentCount       Int      @default(0) @map("sent_count")
+  settings        String?  @default("{}")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  igAccount IgAccount @relation(fields: [igAccountId], references: [id])
+  dmQueue   DmQueue[]
+
+  @@map("dm_campaigns")
+}
+
+model DmQueue {
+  id               Int       @id @default(autoincrement())
+  campaignId       Int?      @map("campaign_id")
+  igAccountId      Int       @map("ig_account_id")
+  recipientId      String?   @map("recipient_id")
+  recipientUsername String   @map("recipient_username")
+  message          String
+  status           String    @default("pending")
+  sentAt           DateTime? @map("sent_at")
+  error            String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  campaign  DmCampaign? @relation(fields: [campaignId], references: [id])
+  igAccount IgAccount   @relation(fields: [igAccountId], references: [id])
+
+  @@map("dm_queue")
+}
+
+model ScheduledPost {
+  id           Int       @id @default(autoincrement())
+  igAccountId  Int       @map("ig_account_id")
+  mediaType    String    @default("image") @map("media_type")
+  caption      String?
+  mediaUrl     String    @map("media_url")
+  thumbnailUrl String?   @map("thumbnail_url")
+  scheduledAt  DateTime  @map("scheduled_at")
+  status       String    @default("scheduled")
+  publishedAt  DateTime? @map("published_at")
+  error        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  igAccount IgAccount @relation(fields: [igAccountId], references: [id])
+
+  @@map("scheduled_posts")
+}
+
+model AutoReply {
+  id            Int      @id @default(autoincrement())
+  igAccountId   Int      @map("ig_account_id")
+  name          String
+  triggerType   String   @map("trigger_type")
+  triggerKeyword String? @map("trigger_keyword")
+  replyType     String   @default("dm") @map("reply_type")
+  message       String
+  status        String   @default("active")
+  usedCount     Int      @default(0) @map("used_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  igAccount IgAccount @relation(fields: [igAccountId], references: [id])
+
+  @@map("auto_replies")
+}
+
+model HashtagGroup {
+  id          Int      @id @default(autoincrement())
+  igAccountId Int      @map("ig_account_id")
+  name        String
+  hashtags    String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  igAccount IgAccount @relation(fields: [igAccountId], references: [id])
+
+  @@map("hashtag_groups")
+}
+
+model DmConversation {
+  id                Int      @id @default(autoincrement())
+  igAccountId       Int      @map("ig_account_id")
+  participantId     String?  @map("participant_id")
+  participantUsername String  @map("participant_username")
+  lastMessage       String?  @map("last_message")
+  unread            Int      @default(0)
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  igAccount IgAccount @relation(fields: [igAccountId], references: [id])
+
+  @@map("dm_conversations")
+}
+
+model AnalyticsCache {
+  id          Int      @id @default(autoincrement())
+  igAccountId Int      @map("ig_account_id")
+  dataType    String   @map("data_type")
+  data        String
+  cachedAt    DateTime @default(now()) @map("cached_at")
+
+  igAccount IgAccount @relation(fields: [igAccountId], references: [id])
+
+  @@map("analytics_cache")
+}
+
+model ShortLink {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  slug      String   @unique
+  targetUrl String   @map("target_url")
+  title     String?
+  clicks    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("short_links")
+}
+
+model BioPage {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  title      String
+  bio        String?
+  avatarUrl  String?  @map("avatar_url")
+  themeColor String   @default("#f4a261") @map("theme_color")
+  username   String   @unique
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user  User      @relation(fields: [userId], references: [id])
+  links BioLink[]
+
+  @@map("bio_pages")
+}
+
+model BioLink {
+  id         Int      @id @default(autoincrement())
+  bioPageId  Int      @map("bio_page_id")
+  title      String
+  url        String
+  icon       String?
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  bioPage BioPage @relation(fields: [bioPageId], references: [id])
+
+  @@map("bio_links")
+}
+
+model ContentIdea {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  idea      String
+  category  String?
+  status    String   @default("draft")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("content_ideas")
+}
+
+model CaptionTemplate {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  title     String
+  content   String
+  category  String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("caption_templates")
+}
+
+model QrCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  title     String
+  targetUrl String   @map("target_url")
+  bgColor   String   @default("#ffffff") @map("bg_color")
+  fgColor   String   @default("#000000") @map("fg_color")
+  downloads Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("qr_codes")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  title       String
+  description String?
+  price       Float    @default(0)
+  type        String   @default("digital")
+  fileUrl     String?  @map("file_url")
+  imageUrl    String?  @map("image_url")
+  slug        String   @unique
+  status      String   @default("active")
+  policies    String?  @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user   User          @relation(fields: [userId], references: [id])
+  orders DigitalOrder[]
+
+  @@map("products")
+}
+
+model DigitalOrder {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @map("user_id")
+  productId      Int      @map("product_id")
+  amount         Float
+  status         String   @default("pending")
+  downloadToken  String   @unique @map("download_token")
+  razorpayOrderId String? @map("razorpay_order_id")
+  paymentId      String?  @map("payment_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user         User         @relation(fields: [userId], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
+  transactions Transaction[]
+
+  @@map("digital_orders")
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  orderId     Int?     @map("order_id")
+  amount      Float
+  type        String   @default("credit")
+  description String?
+  status      String   @default("completed")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user  User         @relation(fields: [userId], references: [id])
+  order DigitalOrder? @relation(fields: [orderId], references: [id])
+
+  @@map("transactions")
+}

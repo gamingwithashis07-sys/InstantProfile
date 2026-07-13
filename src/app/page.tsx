@@ -171,7 +171,7 @@ export default function HomePage() {
           viewport={{ once: true }}
           className="text-3xl md:text-4xl font-bold text-center mb-4"
         >
-          Why Choose InstaAutomate
+          Why Choose InstantProfile
         </motion.h2>
         <motion.div
           variants={container}
@@ -249,7 +249,7 @@ export default function HomePage() {
 
       {/* ─── FOOTER ─── */}
       <footer className="text-center py-8 text-sm text-[#9c8a7a] border-t border-white/10">
-        <p>&copy; 2024 InstaAutomate. All rights reserved. Built on the Instagram Graph API.</p>
+        <p>&copy; 2024 InstantProfile. All rights reserved. Built on the Instagram Graph API.</p>
       </footer>
     </div>
   )
