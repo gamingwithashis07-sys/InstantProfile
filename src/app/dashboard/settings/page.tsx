@@ -7,41 +7,11 @@ import { NeuButton } from '@/components/ui/NeuButton'
 import { NeuInput } from '@/components/ui/NeuInput'
 import { useToast } from '@/components/ui/Toast'
 import { useThemeContext } from '@/components/layout/ThemeProvider'
-import { Palette, Sun, Moon, Bell, Globe, Eye, CreditCard, Shield } from 'lucide-react'
+import { Palette, Sun, Moon, Bell, Globe, Eye } from 'lucide-react'
 
 export default function UserSettings() {
   const { theme, setTheme, accent, setAccent } = useThemeContext()
   const { showToast } = useToast()
-  const [razorpayKeyId, setRazorpayKeyId] = useState('')
-  const [razorpaySecret, setRazorpaySecret] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [loaded, setLoaded] = useState(false)
-
-  useEffect(() => {
-    fetch('/api/settings')
-      .then(r => r.json())
-      .then(settings => {
-        const map = Object.fromEntries(settings.map((s: any) => [s.key, s.value]))
-        setRazorpayKeyId(map.razorpay_key_id || '')
-        setRazorpaySecret(map.razorpay_key_secret || '')
-        setLoaded(true)
-      })
-  }, [])
-
-  const saveRazorpay = async () => {
-    setSaving(true)
-    await fetch('/api/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify([
-        { key: 'razorpay_key_id', value: razorpayKeyId },
-        { key: 'razorpay_key_secret', value: razorpaySecret },
-      ]),
-    })
-    setSaving(false)
-    showToast('Payment settings saved!', 'success')
-  }
-
   const accentColors = ['#f4a261', '#e8a87c', '#7cb86c', '#6cb8c4', '#c46cb8', '#6c7cc4']
 
   return (
@@ -106,25 +76,7 @@ export default function UserSettings() {
           </div>
         </ClayCard>
 
-        <ClayCard className="lg:col-span-2">
-          <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-[#f4a261]" /> Payment Gateway — Razorpay
-          </h3>
-          <p className="text-xs text-[#6b5a4c] dark:text-[#9c8a7a] mb-4">
-            Connect Razorpay to accept payments. Buyers pay via UPI, cards, or net banking. Amounts are credited directly to your linked Razorpay account.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4 mb-4">
-            <NeuInput label="Razorpay Key ID" value={razorpayKeyId} onChange={e => setRazorpayKeyId(e.target.value)} placeholder="rzp_live_xxxxxxxx" />
-            <NeuInput label="Razorpay Key Secret" type="password" value={razorpaySecret} onChange={e => setRazorpaySecret(e.target.value)} placeholder="xxxxxxxxxxxx" />
-          </div>
-          <div className="flex items-center gap-2 text-xs text-[#9c8a7a] mb-4">
-            <Shield className="w-3.5 h-3.5" /> Get your keys from{' '}
-            <a href="https://dashboard.razorpay.com" target="_blank" rel="noopener noreferrer" className="text-[#f4a261] hover:underline">Razorpay Dashboard</a>
-          </div>
-          <NeuButton variant="primary" onClick={saveRazorpay} loading={saving}>
-            <CreditCard className="w-4 h-4" /> Save Payment Settings
-          </NeuButton>
-        </ClayCard>
+  
       </div>
     </motion.div>
   )

@@ -13,6 +13,7 @@ async function main() {
       ['graph_api_version', 'v21.0'],
       ['fb_app_id', ''],
       ['fb_app_secret', ''],
+      ['site_url', ''],
       ['admin_secret_code', 'admin2024'],
     ]
     for (const [key, value] of defaults) {

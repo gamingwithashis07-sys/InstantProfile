@@ -31,7 +31,7 @@ export default function AdminIntegrations() {
   const { showToast } = useToast()
 
   // ── Form states ──
-  const [fb, setFb] = useState({ fb_app_id: '', fb_app_secret: '', graph_api_version: 'v21.0' })
+  const [fb, setFb] = useState({ fb_app_id: '', fb_app_secret: '', graph_api_version: 'v21.0', site_url: '' })
   const [rzp, setRzp] = useState({ razorpay_key_id: '', razorpay_key_secret: '' })
   const [smtp, setSmtp] = useState({ smtp_host: '', smtp_port: '587', smtp_user: '', smtp_pass: '', smtp_from: '' })
   const [recaptcha, setRecaptcha] = useState({ recaptcha_site_key: '', recaptcha_secret_key: '' })
@@ -44,7 +44,7 @@ export default function AdminIntegrations() {
   useEffect(() => {
     fetch('/api/admin/settings').then(r => r.json()).then(data => {
       if (!data) return
-      setFb({ fb_app_id: data.fb_app_id || '', fb_app_secret: data.fb_app_secret || '', graph_api_version: data.graph_api_version || 'v21.0' })
+      setFb({ fb_app_id: data.fb_app_id || '', fb_app_secret: data.fb_app_secret || '', graph_api_version: data.graph_api_version || 'v21.0', site_url: data.site_url || '' })
       setRzp({ razorpay_key_id: data.razorpay_key_id || '', razorpay_key_secret: data.razorpay_key_secret || '' })
       setSmtp({ smtp_host: data.smtp_host || '', smtp_port: data.smtp_port || '587', smtp_user: data.smtp_user || '', smtp_pass: data.smtp_pass || '', smtp_from: data.smtp_from || '' })
       setRecaptcha({ recaptcha_site_key: data.recaptcha_site_key || '', recaptcha_secret_key: data.recaptcha_secret_key || '' })
@@ -129,7 +129,7 @@ export default function AdminIntegrations() {
               <p className="text-xs text-[#6b5a4c] dark:text-[#9c8a7a]">Required for Instagram automation features</p>
             </div>
           </div>
-          <div className="grid sm:grid-cols-3 gap-4 mb-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
             <NeuInput label="App ID" value={fb.fb_app_id} onChange={e => setFb({ ...fb, fb_app_id: e.target.value })} placeholder="123456789" />
             <div className="relative">
               <NeuInput label="App Secret" type={showSecrets.fb_app_secret ? 'text' : 'password'} value={fb.fb_app_secret} onChange={e => setFb({ ...fb, fb_app_secret: e.target.value })} placeholder="••••••••" />
@@ -138,7 +138,9 @@ export default function AdminIntegrations() {
               </button>
             </div>
             <NeuInput label="Graph API Version" value={fb.graph_api_version} onChange={e => setFb({ ...fb, graph_api_version: e.target.value })} placeholder="v21.0" />
+            <NeuInput label="Site URL" value={fb.site_url} onChange={e => setFb({ ...fb, site_url: e.target.value })} placeholder="https://example.com" />
           </div>
+          <p className="text-xs text-[#9c8a7a] mb-3">Site URL is used for OAuth redirect URIs (e.g. https://your-app.vercel.app)</p>
           <NeuButton variant="primary" onClick={() => saveSection('facebook', fb)} loading={saving === 'facebook'}><CheckCircle className="w-4 h-4" /> Save Facebook Settings</NeuButton>
         </ClayCard>
 
@@ -236,35 +238,27 @@ export default function AdminIntegrations() {
           <NeuButton variant="primary" onClick={() => saveSection('openai', openai)} loading={saving === 'openai'}><CheckCircle className="w-4 h-4" /> Save OpenAI Settings</NeuButton>
         </ClayCard>
 
-        {/* Authentication */}
+        {/* Admin User */}
         <ClayCard>
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 rounded-[12px] bg-[#e8c36c]/20 flex items-center justify-center">
               <Lock className="w-5 h-5 text-[#e8c36c]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Authentication</h3>
-              <p className="text-xs text-[#6b5a4c] dark:text-[#9c8a7a]">JWT signing key and admin security</p>
+              <h3 className="font-bold text-lg">Admin Access</h3>
+              <p className="text-xs text-[#6b5a4c] dark:text-[#9c8a7a]">Authentication is handled by Clerk</p>
             </div>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4 mb-4">
-            <div className="relative">
-              <NeuInput label="JWT Secret" type={showSecrets.jwt_secret ? 'text' : 'password'} value={auth.jwt_secret} onChange={e => setAuth({ ...auth, jwt_secret: e.target.value })} placeholder="Change from default!" />
-              <button type="button" onClick={() => toggleSecret('jwt_secret')} className="absolute right-3 top-[34px] text-[#9c8a7a] hover:text-white">
-                {showSecrets.jwt_secret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <div className="relative">
-              <NeuInput label="Admin Secret Code" type={showSecrets.admin_secret_code ? 'text' : 'password'} value={auth.admin_secret_code} onChange={e => setAuth({ ...auth, admin_secret_code: e.target.value })} placeholder="Change from default!" />
-              <button type="button" onClick={() => toggleSecret('admin_secret_code')} className="absolute right-3 top-[34px] text-[#9c8a7a] hover:text-white">
-                {showSecrets.admin_secret_code ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
+          <div className="bg-[#e8c36c]/10 border border-[#e8c36c]/20 rounded-[14px] p-4 mb-4">
+            <p className="text-sm font-medium mb-2">How to set an admin user:</p>
+            <ol className="text-sm text-[#6b5a4c] dark:text-[#9c8a7a] space-y-1 list-decimal list-inside">
+              <li>Go to <a href="https://dashboard.clerk.com" target="_blank" rel="noopener noreferrer" className="text-[#f4a261] hover:underline">Clerk Dashboard</a></li>
+              <li>Find the user you want to make admin</li>
+              <li>Click on the user → <strong>Edit</strong></li>
+              <li>Under <strong>Public metadata</strong>, add: <code className="bg-black/20 px-1.5 py-0.5 rounded text-xs">{'{ "role": "admin" }'}</code></li>
+              <li>Save — the user can now access /admin</li>
+            </ol>
           </div>
-          <div className="flex items-center gap-2 text-xs text-amber-500 mb-4">
-            <AlertTriangle className="w-3.5 h-3.5" /> Change from default values before going live!
-          </div>
-          <NeuButton variant="primary" onClick={() => saveSection('auth', auth)} loading={saving === 'auth'}><CheckCircle className="w-4 h-4" /> Save Auth Settings</NeuButton>
         </ClayCard>
 
         {/* Custom API Keys */}
