@@ -3,29 +3,41 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ClayCard } from '@/components/ui/ClayCard'
-import { Send } from 'lucide-react'
+import { NeuInput } from '@/components/ui/NeuInput'
+import { Send, Search } from 'lucide-react'
 
 export default function AdminDmQueuePage() {
   const [queue, setQueue] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
 
-  const load = async () => {
-    const data = await fetch('/api/admin/dm-queue').then(r => r.json())
-    setQueue(data)
-    setLoading(false)
-  }
+  useEffect(() => {
+    fetch('/api/admin/dm-queue').then(r => r.json()).then(data => { setQueue(data); setLoading(false) }).catch(() => setLoading(false))
+  }, [])
 
-  useEffect(() => { load() }, [])
+  const filtered = queue.filter(q =>
+    q.recipient_username?.toLowerCase().includes(search.toLowerCase()) ||
+    q.username?.toLowerCase().includes(search.toLowerCase()) ||
+    q.message?.toLowerCase().includes(search.toLowerCase())
+  )
 
   if (loading) return <div><h2 className="text-2xl font-bold mb-6">DM Queue</h2><p className="text-[#6b5a4c]">Loading...</p></div>
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h2 className="text-2xl font-bold mb-6">All DM Queue Items</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">DM Queue</h2>
+        <NeuInput placeholder="Search queue..." value={search} onChange={e => setSearch(e.target.value)} className="max-w-[220px]" />
+      </div>
       {queue.length === 0 ? (
         <ClayCard className="text-center py-12">
           <Send className="w-12 h-12 mx-auto mb-3 text-[#9c8a7a]" />
           <p>No queued DMs.</p>
+        </ClayCard>
+      ) : filtered.length === 0 ? (
+        <ClayCard className="text-center py-12">
+          <Search className="w-12 h-12 mx-auto mb-3 text-[#9c8a7a]" />
+          <p>No items match your search.</p>
         </ClayCard>
       ) : (
         <ClayCard hover={false} className="overflow-hidden p-0">
@@ -33,7 +45,7 @@ export default function AdminDmQueuePage() {
             <table className="neu-table">
               <thead><tr><th>ID</th><th>User</th><th>To</th><th>Message</th><th>Status</th><th>Sent At</th><th>Created</th></tr></thead>
               <tbody>
-                {queue.map(q => (
+                {filtered.map(q => (
                   <motion.tr key={q.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                     <td className="font-semibold">#{q.id}</td>
                     <td>{q.username}</td>

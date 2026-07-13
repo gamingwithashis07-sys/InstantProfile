@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard, MessageSquare, Camera, Bell, Hash, BarChart3, Instagram,
-  User, Settings, ChevronLeft, ChevronRight, Home, LogOut, Zap, ShoppingCart, Bot, Wallet, Crown
+  User, Settings, ChevronLeft, ChevronRight, Home, LogOut, Zap, ShoppingCart, Bot, Wallet, Crown, ListOrdered, Clock
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/Toast'
@@ -20,6 +20,8 @@ const links = [
   { href: '/dashboard/replies', label: 'Auto Replies', icon: Bell },
   { href: '/dashboard/hashtags', label: 'Hashtag Groups', icon: Hash },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard/orders', label: 'DM Queue', icon: ListOrdered },
+  { href: '/dashboard/history', label: 'History', icon: Clock },
   { href: '/dashboard/accounts', label: 'IG Accounts', icon: Instagram },
   { href: '/dashboard/products', label: 'Products', icon: ShoppingCart },
   { href: '/dashboard/earnings', label: 'Earnings', icon: Wallet },
