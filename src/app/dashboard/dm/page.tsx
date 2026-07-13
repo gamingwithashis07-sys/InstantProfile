@@ -36,7 +36,7 @@ export default function DMPage() {
         <Link href="/dashboard/dm/new"><NeuButton variant="primary" size="sm"><Plus className="w-4 h-4" /> New Campaign</NeuButton></Link>
       </div>
 
-      <div className="flex gap-1 mb-6 p-1 bg-white/5 rounded-[12px] w-fit">
+      <div className="flex gap-1 mb-6 p-1 bg-white/5 rounded-[12px] w-fit overflow-x-auto">
         {tabs.map(tab => {
           const Icon = tab.icon
           const isActive = pathname === tab.href

@@ -87,7 +87,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return (
       <div className="flex min-h-screen">
         <UserSidebar />
-        <div className="flex-1 ml-[240px] p-6 md:p-8 flex items-center justify-center">
+        <div         className="flex-1 p-6 md:p-8 flex items-center justify-center">
           <GlassCard className="p-10 max-w-lg text-center">
             <div className="text-6xl mb-4">📱</div>
             <h2 className="text-2xl font-bold mb-2">Connect Your Instagram Account</h2>
@@ -108,7 +108,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 ml-[240px] p-6 md:p-8 pb-[70px] md:pb-8"
+        className="flex-1 p-6 md:p-8 pb-[70px] md:pb-8 md:ml-[240px]"
       >
         {children}
       </motion.div>

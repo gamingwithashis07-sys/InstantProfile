@@ -34,9 +34,10 @@ export function AdminSidebar() {
       animate={{ width: collapsed ? 72 : 240 }}
       className={cn(
         'fixed left-0 top-[70px] bottom-0 z-[500]',
+        'hidden md:flex', // hide on mobile, show as flex on md+
         'bg-white/95 dark:bg-[#1a0e08]/95',
         'border-r border-white/20 dark:border-white/5',
-        'p-3 flex flex-col gap-1 overflow-hidden'
+        'p-3 flex-col gap-1 overflow-hidden'
       )}
     >
       <button

@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 ml-[240px] p-6 md:p-8 min-h-screen"
+        className="flex-1 p-6 md:p-8 min-h-screen md:ml-[240px]"
       >
         {children}
       </motion.div>
