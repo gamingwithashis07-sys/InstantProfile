@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Key, Package, ShoppingCart, Users, Settings as SettingsIcon,
-  BarChart3, Activity, ChevronLeft, ChevronRight, Home, Instagram, MessageSquare, CreditCard, Globe,
+  BarChart3, Activity, ChevronLeft, ChevronRight, Home, Instagram, MessageSquare, CreditCard, Globe, Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +21,7 @@ const links = [
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/activity', label: 'Activity', icon: Activity },
+  { href: '/admin/audit', label: 'Security Audit', icon: Shield },
   { href: '/admin/settings', label: 'Settings', icon: SettingsIcon },
 ]
 

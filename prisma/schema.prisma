@@ -29,6 +29,7 @@ model User {
   digitalOrders    DigitalOrder[]
   transactions     Transaction[]
   activityLogs     ActivityLog[]
+  auditLogs        AuditLog[]
 
   @@map("users")
 }
@@ -340,4 +341,23 @@ model Transaction {
   order DigitalOrder? @relation(fields: [orderId], references: [id])
 
   @@map("transactions")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  target    String?
+  status    Int
+  ip        String?
+  userAgent String?  @map("user_agent")
+  device    String?
+  method    String?
+  path      String?
+  detail    String?
+  userId    Int?     @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
 }

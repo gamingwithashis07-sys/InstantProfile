@@ -4,10 +4,10 @@ import { requireAdminUserId, unauthorized, forbidden } from '@/lib/helpers'
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await requireAdminUserId()
+    await requireAdminUserId(req)
   } catch (e: any) {
-    if (e.message === 'Forbidden') return forbidden()
-    return unauthorized()
+    if (e.message === 'Forbidden') return forbidden(req)
+    return unauthorized(req)
   }
   const { id } = await params
   await prisma.bioTheme.delete({ where: { id: Number(id) } })

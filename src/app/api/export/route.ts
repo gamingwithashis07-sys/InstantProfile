@@ -4,11 +4,11 @@ import { requireAdminUserId, unauthorized, forbidden } from '@/lib/helpers'
 
 export async function GET(req: NextRequest) {
   try {
-    await requireAdminUserId()
+    await requireAdminUserId(req)
   } catch (e: any) {
-    if (e.message === 'Unauthorized') return unauthorized()
-    if (e.message === 'Forbidden') return forbidden()
-    return unauthorized()
+    if (e.message === 'Unauthorized') return unauthorized(req)
+    if (e.message === 'Forbidden') return forbidden(req)
+    return unauthorized(req)
   }
 
   const type = req.nextUrl.searchParams.get('type') || 'dm_queue'

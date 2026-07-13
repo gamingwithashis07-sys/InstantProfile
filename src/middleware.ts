@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
+import { NextResponse } from 'next/server'
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
@@ -23,13 +24,27 @@ const isProtectedRoute = createRouteMatcher([
   '/api/orders(.*)',
   '/api/export(.*)',
   '/api/admin(.*)',
+  '/api/user(.*)',
   '/admin(.*)',
+])
+
+const isSensitiveRoute = createRouteMatcher([
+  '/api/admin(.*)',
+  '/api/user/upgrade(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect()
   }
+
+  if (isSensitiveRoute(req)) {
+    const response = NextResponse.next()
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return response
+  }
+
+  return NextResponse.next()
 })
 
 export const config = {
